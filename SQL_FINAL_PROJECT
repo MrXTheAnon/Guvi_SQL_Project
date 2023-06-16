@@ -1,1 +1,81 @@
+# Q1
 
+SELECT customerid, CONCAT(firstname, ' ', lastname) AS fullname, DATEDIFF(year, birthdate, CURDATE()) AS presentage
+FROM customers;
+
+# Q2
+
+SELECT LENGTH(firstname) AS name_length, COUNT(*) AS customer_count 
+FROM customers
+GROUP BY name_length;
+
+# Q3
+
+SELECT COUNT(DISTINCT c.customerid) AS customer_count
+FROM customers c
+INNER JOIN orders o ON c.customerid = o.customerid
+WHERE c.country = 'United States'
+  AND YEAR(o.orderdate) = 2021
+  AND QUARTER(o.orderdate) = 1;
+
+# Q4
+
+SELECT YEAR(orderdate) AS year, WEEK(orderdate) AS week, COUNT(*) AS order_count
+FROM orders
+WHERE YEAR(orderdate) IN (2020, 2021)
+GROUP BY YEAR(orderdate), WEEK(orderdate)
+ORDER BY YEAR(orderdate), WEEK(orderdate);
+
+# Q5
+
+SELECT
+  c.CustomerID,
+  SUBSTRING_INDEX(c.Email, '@', -1) AS EmailDomain,
+  CONCAT(
+    c.FirstName,
+    ' ',
+    c.LastName,
+    ' was born on ',
+    CONCAT(DAY(c.DateOfBirth), CASE WHEN DAY(c.DateOfBirth) IN (11,12,13) THEN 'th' ELSE CASE RIGHT(DAY(c.DateOfBirth), 1) WHEN '1' THEN 'st' WHEN '2' THEN 'nd' WHEN '3' THEN 'rd' ELSE 'th' END END),
+    ' ',
+    DATE_FORMAT(c.DateOfBirth, '%M %Y'),
+    ' has ordered ',
+    COUNT(o.OrderID),
+    ' orders yet.'
+  ) AS Description_
+FROM
+  customers AS c
+JOIN
+  orders AS o ON c.CustomerID = o.CustomerID
+GROUP BY
+  c.CustomerID, c.Email, c.FirstName, c.LastName, c.DateOfBirth
+ORDER BY
+  o.DateEntered DESC, c.CustomerID ASC;
+
+# Q6
+
+SELECT DAYNAME(o.DeliveryDate) AS DayName, COUNT(*) AS OrderCount
+FROM orders AS o
+JOIN products AS p ON o.ProductID = p.ProductID
+GROUP BY DayName
+ORDER BY OrderCount DESC;
+
+# Q7
+
+SELECT OrderID, CustomerID, AVG(TotalOrderAmount) AS AverageRevenue
+FROM orders
+WHERE DATEDIFF(ShipDate, OrderDate) = 3
+GROUP BY OrderID, CustomerID
+ORDER BY OrderID ASC;
+
+# Q8
+
+SELECT 
+    Country,
+    CASE
+        WHEN COUNT(*) > 1 THEN CONCAT('There are ', COUNT(*), ' Suppliers from ', Country)
+        ELSE CONCAT('There is 1 Supplier from ', Country)
+    END AS Sentence
+FROM suppliers
+GROUP BY Country
+ORDER BY Country ASC;
